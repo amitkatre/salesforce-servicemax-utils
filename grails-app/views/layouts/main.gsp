@@ -18,6 +18,8 @@
     <link rel="stylesheet" type="text/css" href="${resource(dir: 'css', file: 'superfish.css')}" media="screen" />
     <link rel="stylesheet" href="${resource(dir: 'css', file: 'jquery.tagsinput.css')}" />
     <link rel="stylesheet" href="${resource(dir: 'css', file: 'jquery.treeview.css')}" />
+    <link rel="stylesheet" href="${resource(dir: 'css', file: 'ui.jqgrid.css')}" />
+    <link rel="stylesheet" href="${resource(dir: 'css', file: 'jquery.gritter.css')}" />
     <!-- fluid GS -->
     <link rel="stylesheet" type="text/css" href="${resource(dir: 'css', file: 'fluid.gs.css')}" media="screen" />
     <!--[if lt IE 8 ]>
@@ -41,19 +43,17 @@
         <script src="${resource(dir: 'js/libs', file: 'dd_belatedpng.js')}"></script>
         <script> DD_belatedPNG.fix('images, .png_bg');</script>
         <![endif]-->
-    <!-- modernizr -->
     <script src="${resource(dir: 'js/libs', file: 'modernizr-1.7.min.js')}"></script>
-
-    <!-- superfish menu and needed js for menu -->
     <script src="${resource(dir: 'js', file: 'superfish.js')}"></script>
     <script src="${resource(dir: 'js', file: 'supersubs.js')}"></script>
     <script src="${resource(dir: 'js', file: 'hoverIntent.js')}"></script>
-
-    <!-- treeview -->
     <script src="${resource(dir: 'js', file: 'jquery.treeview.js')}"></script>
-
-    <!-- dataTable -->
-    <script src="${resource(dir: 'js', file: 'jquery.dataTables.min.js')}"></script>
+    <script src="${resource(dir: 'js', file: 'jquery.form.js')}"></script>
+    <script src="${resource(dir: 'js', file: 'jquery.gritter.js')}"></script>
+    <script src="${resource(dir: 'js/i18n', file: 'grid.locale-en.js')}"></script>
+    <script src="${resource(dir: 'js', file: 'jquery.metadata.js')}"></script>
+    <script src="${resource(dir: 'js', file: 'jquery.jqGrid.min.js')}"></script>
+    <script src="${resource(dir: 'js', file: 'jquery.dialog.form.js')}"></script>
 
     <g:layoutHead />
     <g:javascript library="application" />
@@ -79,7 +79,19 @@
         </div>
         <div class="clear"></div>
         <div class="grid_16" >
-            <div id="navigationTop" style="height:30px" ></div>
+            <sec:ifNotLoggedIn >
+                <div id="navigationTop"  style="height:30px" ></div>
+            </sec:ifNotLoggedIn>
+            <sec:ifLoggedIn >
+                <ul class="sf-menu" id="navigationTop" >
+                    <li class="selected" >
+                        <g:link action="index" controller="main" >Main</g:link>
+                        <ul>
+                            <li><a href="#" onclick='loadPage("#regOrgsDiv", "#leftBarContent", "<g:createLink controller="organizationInfo" />", null);return false;' >Manage Salesforce Logins</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </sec:ifLoggedIn>
         </div>
         <div class="grid_16" >
             <h2 id="page-heading" style="display: none;">&nbsp;</h2>
@@ -93,6 +105,7 @@
 
     <div id="main" role="main" >
         <div id="content" >
+            <div class="grid_16" ><div style="height:20px" ></div></div>
             <g:layoutBody />
         </div>
 
@@ -107,7 +120,7 @@
         </div>
         <div class="clear"></div>
     </footer>
-
+    <div id="dialog-form" ></div>
 </div>
 <r:layoutResources />
 </body>
