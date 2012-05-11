@@ -22,4 +22,13 @@ class OrganizationInfo {
         securityToken nullable: true, maxSize: 64
         sandbox nullable: false
     }
+
+    def getOrgPassword() {
+        if (securityToken) {
+            return "${password}${securityToken}"
+        }
+        else {
+            return password
+        }
+    }
 }

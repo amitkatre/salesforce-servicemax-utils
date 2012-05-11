@@ -32,28 +32,7 @@
             },
             gridComplete: function() {
 
-                $("span.edit-organizationInfo, #add-organizationInfo").dialogForm({
-                    formUrl: '<g:createLink controller="organizationInfo" action="edit" />',
-                    formElement: '.create_organizationInfo',
-                    dialogTitle: 'New Org Info',
-                    formHeight: 370,
-                    formWidth: 350,
-                    beforeLoad: function(ui) {
-                        var data = $(ui).metadata();
-                        if (data.id != null) {
-                            return {id: data.id}
-                        }
-                    },
-                    onSuccess: function(data) {
-                        if (data.success == true) {
-                            $('#registered_orgs_list').trigger('reloadGrid');
-                            $.gritter.add({title: 'Update has been completed', text: "Org details saved"});
-                        }
-                        else {
-                            showErrors(data.errors);
-                        }
-                    }
-                });
+                setNewOrgInfoDialogClick("span.edit-organizationInfo, #add-organizationInfo");
 
                 $("span.delete-organizationInfo").click(function() {
                     var data = $(this).metadata();
@@ -73,6 +52,21 @@
                             }
                         }
                     });
+                });
+
+                $("span.check-organzationInfo").click(function() {
+                    var data = $(this).metadata();
+
+                    $.post('<g:createLink controller="organizationInfo" action="checkConnection" />', { id: data.id}, function(data) {
+                        if (data.success == 'true') {
+                            $.gritter.add({title: 'Checked connection', text: "All good"});
+                        }
+                        else {
+                            $.gritter.add({title: 'Checked connection', text: "Bad Connection: " + data.errors.error});
+                        }
+
+                    }, 'json');
+
                 });
             }
         });
