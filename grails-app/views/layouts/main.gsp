@@ -64,6 +64,13 @@
             $('#navigationTop').superfish();
         });
 
+        contextPath = "${request.contextPath}";
+        staticJSPath = "${resource(dir: 'js')}";
+        staticCSSPath = "${resource(dir: 'css')}";
+        staticImagePath = "${resource(dir: 'images')}";
+        staticCommonImagePath = "${resource(dir:'images', plugin:'mnpub-common')}";
+    </script>
+
 
     </script>
 

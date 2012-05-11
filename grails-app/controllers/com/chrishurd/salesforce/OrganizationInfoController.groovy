@@ -10,6 +10,7 @@ class OrganizationInfoController {
     def domainService
     def jsonService
     def organizationInfoService
+    def connectionService
 
     def index = { }
 
@@ -41,7 +42,9 @@ class OrganizationInfoController {
                         orgInfo.id.toString(),
                         orgInfo.name,
                         (orgInfo.sandbox ? 'Test' : 'Prod'),
-                        "<span class=\"edit-organizationInfo ui-icon ui-icon-pencil {id: '${orgInfo.id}'}\" ></span><span class=\"delete-organizationInfo ui-icon ui-icon-trash {id: '${orgInfo.id}'}\" ></span>"
+                        "<span class=\"edit-organizationInfo ui-icon ui-icon-pencil {id: '${orgInfo.id}'}\" ></span>"
+                             + "<span class=\"delete-organizationInfo ui-icon ui-icon-trash {id: '${orgInfo.id}'}\" ></span>"
+                             + "<span class=\"check-organzationInfo ui-icon ui-icon-check {id: '${orgInfo.id}'}\" ></span>"
                     ]
                     gridModel.grid.rows.add(row)
                 }
@@ -63,6 +66,8 @@ class OrganizationInfoController {
         return [orgInfo : orgInfo]
     }
 
+
+
     def delete = {
         def jsonResponse
         def id = params.id
@@ -79,6 +84,23 @@ class OrganizationInfoController {
 
         jsonResponse = [success: 'true']
         render new JSON(jsonResponse)
+    }
+
+    def checkConnection = {
+        def orgInfo = OrganizationInfo.get(Long.valueOf(params.id))
+        def jsonResponse
+
+        try {
+            connectionService.getPartnerConnection(orgInfo)
+        }
+        catch (Exception ex) {
+            ex.printStackTrace()
+            render new JSON(jsonService.prepareErrorPostResponse(ex.getMessage()))
+            return
+        }
+
+        render  new JSON([success: 'true'])
+
     }
 
     def save = {
