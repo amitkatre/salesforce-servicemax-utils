@@ -21,7 +21,7 @@ class SFConnection extends com.sforce.ws.ConnectorConfig {
         else {
             this.setAuthEndpoint('https://login.salesforce.com/services/Soap/u/24.0')
         }
-        this.setReadTimeout(600)
+        this.setReadTimeout(600000)
     }
 
 }
