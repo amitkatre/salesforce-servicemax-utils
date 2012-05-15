@@ -6,6 +6,7 @@ import com.sforce.ws.ConnectorConfig
 import java.util.regex.Pattern
 import com.sforce.soap.metadata.MetadataConnection
 import com.sforce.async.BulkConnection
+import com.sforce.soap.partner.sobject.SObject
 
 class ConnectionService {
 
@@ -72,5 +73,44 @@ class ConnectionService {
         }
 
         return bulkConnections.get(orgInfo.name)
+    }
+
+    def query(orgInfo, sql) {
+        def connection = getPartnerConnection(orgInfo)
+
+        def results = connection.query(sql);
+        def resultObjects = []
+        def done = false
+        while (! done) {
+            results.getRecords().each { record ->
+                resultObjects.add(record)
+            }
+
+            if (results.isDone()) {
+                done = true
+            }
+            else {
+                results = connection.queryMore(results.getQueryLocator())
+            }
+        }
+
+        return resultObjects
+    }
+
+    def getAllEditableFields(orgInfo, objectName) {
+
+        def connection = getPartnerConnection(orgInfo)
+
+        def descrProcesses = connection.describeSObject(objectName);
+
+        def fields = [] as Set<String>
+
+        descrProcesses.getFields().each { field ->
+            if (field.isUpdateable()) {
+                fields.add(field.getName())
+            }
+        }
+
+        return fields
     }
 }
