@@ -1,5 +1,6 @@
 var URLS = {
-    edit_org_info : contextPath + "/organizationInfo/edit"
+    edit_org_info : contextPath + "/organizationInfo/edit",
+    select_list_org_info : contextPath + "/organizationInfo/selectList"
 };
 
 
@@ -22,6 +23,8 @@ function loadPage(div, position, link, params) {
         $(position).prepend(data);
     });
 }
+
+
 
 function setToggle(divName) {
     var default_hide = {"grid": true, "navigator": true };
@@ -83,4 +86,17 @@ function setNewOrgInfoDialogClick(div) {
             }
         }
     });
+}
+
+function openSelectOrgDialog(funct) {
+    var selectOrgDialog = $().dialogForm({
+        formUrl: URLS.select_list_org_info,
+        formElement: ".select_organizationInfo",
+        dialogTitle: 'Select Salesforce Org',
+        formHeight: 300,
+        formWidth: 200,
+        onSuccess: funct
+    });
+
+    selectOrgDialog.dialog('show');
 }

@@ -6,6 +6,7 @@ class ConfigurationService {
 
     static scope = "session"
     def connectionService
+    def describeService
 
     def orgConfigurationMap = [:]
 
@@ -34,7 +35,7 @@ class ConfigurationService {
     }
 
     def retrievePageLayouts(orgInfo, orgConfig) {
-        def fields = connectionService.getAllEditableFields(orgInfo, 'SVMXC__Page_Layout__c') as Set<String>
+        def fields = describeService.getAllEditableFields(orgInfo, 'SVMXC__Page_Layout__c') as Set<String>
         fields.add('Name')
 
         connectionService.query(orgInfo, "SELECT Id, ${fields.join(',')} FROM SVMXC__Page_Layout__c ").each { record ->
@@ -45,7 +46,7 @@ class ConfigurationService {
 
     def retrievePageLayoutDetails(orgInfo, orgConfig) {
 
-        def fields = connectionService.getAllEditableFields(orgInfo, 'SVMXC__Page_Layout_Detail__c') as Set<String>
+        def fields = describeService.getAllEditableFields(orgInfo, 'SVMXC__Page_Layout_Detail__c') as Set<String>
         fields.add('Name')
 
         connectionService.query(orgInfo, "SELECT Id, ${fields.join(',')} FROM SVMXC__Page_Layout_Detail__c ").each { record ->
@@ -60,7 +61,7 @@ class ConfigurationService {
             orgConfig.processesRTMap.put(obj.getField('Id'), obj.getField('Name'))
         }
 
-        def fields = connectionService.getAllEditableFields(orgInfo, 'SVMXC__ServiceMax_Processes__c') as Set<String>
+        def fields = describeService.getAllEditableFields(orgInfo, 'SVMXC__ServiceMax_Processes__c') as Set<String>
         fields.add('Name')
         fields.add('RecordTypeId')
 
@@ -77,7 +78,7 @@ class ConfigurationService {
             orgConfig.configDataRTMap.put(obj.getField('Id'), obj.getField('Name'))
         }
 
-        def fields = connectionService.getAllEditableFields(orgInfo, 'SVMXC__ServiceMax_Config_Data__c') as Set<String>
+        def fields = describeService.getAllEditableFields(orgInfo, 'SVMXC__ServiceMax_Config_Data__c') as Set<String>
         fields.add('Name')
         fields.add('RecordTypeId')
 
