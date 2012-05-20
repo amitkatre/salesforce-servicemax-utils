@@ -15,7 +15,7 @@
 
 <body>
 
-    <div class="grid_4" id="leftBarContent" >
+    <div class="grid_4" id="leftBarContent" >&nbsp;
     </div>
 
     <div class="grid_12" id="mainBarContent" >

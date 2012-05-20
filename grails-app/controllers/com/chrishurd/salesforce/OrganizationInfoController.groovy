@@ -14,6 +14,15 @@ class OrganizationInfoController {
 
     def index = { }
 
+    def selectList = {
+        def orgInfoList = OrganizationInfo.createCriteria().list {
+            eq('user', domainService.getUserDomain())
+            order('name', 'asc')
+        }
+
+        [orgInfoList: orgInfoList]
+    }
+
     def list = {
         withFormat {
             html {

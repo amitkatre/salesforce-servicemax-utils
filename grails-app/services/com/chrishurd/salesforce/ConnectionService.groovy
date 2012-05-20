@@ -6,7 +6,6 @@ import com.sforce.ws.ConnectorConfig
 import java.util.regex.Pattern
 import com.sforce.soap.metadata.MetadataConnection
 import com.sforce.async.BulkConnection
-import com.sforce.soap.partner.sobject.SObject
 
 class ConnectionService {
 
@@ -97,20 +96,5 @@ class ConnectionService {
         return resultObjects
     }
 
-    def getAllEditableFields(orgInfo, objectName) {
 
-        def connection = getPartnerConnection(orgInfo)
-
-        def descrProcesses = connection.describeSObject(objectName);
-
-        def fields = [] as Set<String>
-
-        descrProcesses.getFields().each { field ->
-            if (field.isUpdateable()) {
-                fields.add(field.getName())
-            }
-        }
-
-        return fields
-    }
 }

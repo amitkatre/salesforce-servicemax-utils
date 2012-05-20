@@ -54,6 +54,7 @@
     <script src="${resource(dir: 'js', file: 'jquery.metadata.js')}"></script>
     <script src="${resource(dir: 'js', file: 'jquery.jqGrid.min.js')}"></script>
     <script src="${resource(dir: 'js', file: 'jquery.dialog.form.js')}"></script>
+    <script src="${resource(dir: 'js', file: 'jquery.generic.dialog.js')}"></script>
 
     <g:layoutHead />
     <g:javascript library="application" />
@@ -95,6 +96,7 @@
                         <g:link action="index" controller="main" >Main</g:link>
                         <ul>
                             <li><a href="#" onclick='loadPage("#regOrgsDiv", "#leftBarContent", "<g:createLink controller="organizationInfo" />", null);return false;' >Manage Salesforce Logins</a></li>
+                            <li><a href="#" onclick='loadPage("#metaDataDiv", "#mainBarContent", "<g:createLink controller="metadata" />", null);return false;' >Manage Org Metadata</a></li>
                         </ul>
                     </li>
                 </ul>
