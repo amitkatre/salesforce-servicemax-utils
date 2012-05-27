@@ -63,6 +63,8 @@ grails.hibernate.cache.queries = true
 environments {
     development {
         grails.logging.jul.usebridge = true
+        sfdc_svmx.metadata.dir = "~/sfdc-svmx/metadata"
+        sfdc.api.version = 24.0
     }
     production {
         grails.logging.jul.usebridge = false

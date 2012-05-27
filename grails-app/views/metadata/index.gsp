@@ -10,6 +10,25 @@
     <h2>
         <a href="#" id="toggle-metaData" >Manage Org Metadata <span id="orgName" >&nbsp;</span></a>
     </h2>
+    <div class="first metaData" >
+        <div class="sixteen_column section" >
+            <div class="five column">
+                <div class="column_content" >
+                    <select id="currentOrg" >
+                        <option value="" ></option>
+                        <g:each in="${orgList}" var="orgInfo" >
+                            <option value="${orgInfo.id}" >${orgInfo.name}</option>
+                        </g:each>
+                    </select>
+                </div>
+            </div>
+            <div class="eleven column" >&nbsp;</div>
+        </div>
+        <div class="sixteen_column section" id="metaDataOrgDiv" >
+
+        </div>
+    </div>
+
 
 </div>
 
@@ -17,6 +36,14 @@
     $(function() {
         setToggle('metaData');
 
+        $('#currentOrg').change(function() {
+            if ($(this).val() != null) {
+                $('#metaDataOrgDiv').load(contextPath + '/metadata/load/' + $(this).val(), function() {
+                    $("#metaNavColumn1").treeview();
+                    $("#metaNavColumn2").treeview();
+                });
+            }
+        });
 
     });
 
