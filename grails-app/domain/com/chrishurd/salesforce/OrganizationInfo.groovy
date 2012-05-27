@@ -9,6 +9,7 @@ class OrganizationInfo {
     String password
     String securityToken
     Boolean sandbox = false
+    String loadedObjects
 
     static belongsTo = [
             user: User
@@ -21,6 +22,7 @@ class OrganizationInfo {
         password nullable: false, blank: false, maxSize: 255
         securityToken nullable: true, maxSize: 64
         sandbox nullable: false
+        loadedObjects nullable: true, blank: true, maxSize:10000
     }
 
     def getOrgPassword() {

@@ -55,6 +55,7 @@
     <script src="${resource(dir: 'js', file: 'jquery.jqGrid.min.js')}"></script>
     <script src="${resource(dir: 'js', file: 'jquery.dialog.form.js')}"></script>
     <script src="${resource(dir: 'js', file: 'jquery.generic.dialog.js')}"></script>
+    <script src="${resource(dir: 'js', file: 'jquery.blockUI.js')}"></script>
 
     <g:layoutHead />
     <g:javascript library="application" />

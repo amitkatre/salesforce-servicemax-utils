@@ -1,5 +1,7 @@
 package com.chrishurd.salesforce
 
+import grails.converters.JSON
+
 class MetadataController {
 
     def domainService
@@ -19,7 +21,22 @@ class MetadataController {
     def load() {
         def orgInfo = OrganizationInfo.get(Long.valueOf(params.id))
         def metadataMap =  metadataService.describeMetadata(orgInfo)
+        def loadedObjects = [] as Set<String>
+        if (orgInfo.loadedObjects) {
+            loadedObjects = orgInfo.loadedObjects.split('\\|')
+        }
 
-        [orgInfo : orgInfo, metadataMap : metadataMap]
+        [orgInfo : orgInfo, metadataMap : metadataMap, loadedObjects : loadedObjects]
+    }
+
+    def save() {
+        withFormat {
+            json {
+                def loadedObjects = params.get('loadedObjects')
+                def orgInfo = OrganizationInfo.get(Long.valueOf(params.id))
+
+                render  new JSON([success: 'true'])
+            }
+        }
     }
 }

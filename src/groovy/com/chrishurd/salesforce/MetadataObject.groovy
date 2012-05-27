@@ -14,6 +14,7 @@ class MetadataObject {
     def createdBy
     def lastModifiedBy
     def name
+    def filename
     def id
     def namespace
     def managed = false

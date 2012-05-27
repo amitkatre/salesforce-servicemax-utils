@@ -47,6 +47,7 @@ class MetadataService {
                         mObj.managed = true
                     }
                     mObj.name = obj.fullName
+                    mObj.filename = obj.fileName
                     mObj.namespace = obj.namespacePrefix
                     metadataMap.get(obj.type).addObject(mObj)
                 }

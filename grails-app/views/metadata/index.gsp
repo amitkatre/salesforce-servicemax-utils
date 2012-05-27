@@ -24,7 +24,7 @@
             </div>
             <div class="eleven column" >&nbsp;</div>
         </div>
-        <div class="sixteen_column section" id="metaDataOrgDiv" >
+        <div id="metaDataOrgDiv" >
 
         </div>
     </div>
@@ -38,14 +38,48 @@
 
         $('#currentOrg').change(function() {
             if ($(this).val() != null) {
+                $.blockUI();
                 $('#metaDataOrgDiv').load(contextPath + '/metadata/load/' + $(this).val(), function() {
                     $("#metaNavColumn1").treeview();
                     $("#metaNavColumn2").treeview();
+                    $("input[type='checkbox']").change(function() {
+                        checkMetaObject($(this));
+                    })
+                    $.unblockUI();
+
+
                 });
             }
         });
 
     });
+
+    function checkMetaObject(elem) {
+        if (elem.val().indexOf('_managed') == -1 && elem.val().indexOf('_unmanaged') == -1) {
+            if (elem.is(':checked')) {
+                $('.' + elem.val() + '_managed, .' + elem.val() + '_unmanaged, .' + elem.val() + '_unmanaged_object, .' + elem.val() + '_managed_object').each(function(index) {
+                    $(this).attr('checked', 'true');
+                });
+            }
+            else {
+                $('.' + elem.val() + '_managed, .' + elem.val() + '_unmanaged, .' + elem.val() + '_unmanaged_object, .' + elem.val() + '_managed_object').each(function(index) {
+                    $(this).removeAttr('checked');
+                });
+            }
+        }
+        else if (elem.val().indexOf('_managed') >= 0 || elem.val().indexOf('_unmanaged') >= 0) {
+            if (elem.is(':checked')) {
+                $('.' + elem.val() + '_object').each(function(index) {
+                    $(this).attr('checked', 'true');
+                });
+            }
+            else {
+                $('.' + elem.val() + '_object').each(function(index) {
+                    $(this).removeAttr('checked');
+                });
+            }
+        }
+    }
 
 
 </script>
