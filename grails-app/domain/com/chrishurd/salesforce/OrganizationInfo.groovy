@@ -15,6 +15,10 @@ class OrganizationInfo {
             user: User
     ]
 
+    static mapping = {
+        loadedObject type: 'text'
+    }
+
 
     static constraints = {
         name nullable: false, blank: false, maxSize: 255
@@ -22,7 +26,7 @@ class OrganizationInfo {
         password nullable: false, blank: false, maxSize: 255
         securityToken nullable: true, maxSize: 64
         sandbox nullable: false
-        loadedObjects nullable: true, blank: true, maxSize:10000
+        loadedObjects nullable: true, blank: true, maxSize: 1000000
     }
 
     def getOrgPassword() {

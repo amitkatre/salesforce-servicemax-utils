@@ -17,9 +17,6 @@ class MetadataObject {
     def filename
     def id
     def namespace
-    def managed = false
-
-
 
     def static nameComparator = [
         compare:{ a, b -> a.name <=> b.name }

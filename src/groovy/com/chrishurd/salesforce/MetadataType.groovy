@@ -9,15 +9,5 @@ package com.chrishurd.salesforce
  */
 class MetadataType {
     def type
-    def managedObjects = []
-    def unmanagedObjects = []
-
-    def addObject(obj) {
-        if (obj.managed) {
-            managedObjects.add(obj)
-        }
-        else {
-            unmanagedObjects.add(obj)
-        }
-    }
+    def objects = []
 }

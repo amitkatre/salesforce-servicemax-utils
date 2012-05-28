@@ -6,6 +6,8 @@ class MetadataController {
 
     def domainService
     def metadataService
+    def jsonService
+
 
     def index() {
 
@@ -34,8 +36,13 @@ class MetadataController {
             json {
                 def loadedObjects = params.get('loadedObjects')
                 def orgInfo = OrganizationInfo.get(Long.valueOf(params.id))
+                orgInfo.loadedObjects = loadedObjects.join('|')
+                orgInfo.save(flush: true)
 
-                render  new JSON([success: 'true'])
+                metadataService.getMetadata(orgInfo, loadedObjects)
+
+
+                render new JSON(jsonService.preparePostResponse(orgInfo))
             }
         }
     }
