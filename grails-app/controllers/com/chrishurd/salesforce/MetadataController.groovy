@@ -22,7 +22,7 @@ class MetadataController {
 
     def load() {
         def orgInfo = OrganizationInfo.get(Long.valueOf(params.id))
-        def metadataMap =  metadataService.describeMetadata(orgInfo)
+        def metadataMap =  metadataService.describeAllMetadata(orgInfo)
         def loadedObjects = [] as Set<String>
         if (orgInfo.loadedObjects) {
             loadedObjects = orgInfo.loadedObjects.split('\\|')

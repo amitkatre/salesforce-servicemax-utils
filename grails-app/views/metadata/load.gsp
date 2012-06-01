@@ -6,7 +6,7 @@
             <div id="metadata-navigator" >
                 <ul id="metaNavColumn1" class="treeview-famfamfam" >
                     <g:each in="${metadataMap.keySet().sort()}" var="type" status="i" >
-                        <li class="closed" ><input type="checkbox" name="massObjects" value="${type}" class="${type}" /> ${type}
+                        <li class="closed" ><input type="checkbox" name="loadedObjects" value="${type}/*" class="${type}" ${loadedObjects.contains(type + '/*') ? "CHECKED" : ""} /> ${type}
                             <ul>
                                 <g:if test="${metadataMap.get(type).objects}" >
                                     <li>

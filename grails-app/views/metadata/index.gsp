@@ -42,32 +42,13 @@
                 $('#metaDataOrgDiv').load(contextPath + '/metadata/load/' + $(this).val(), function() {
                     $("#metaNavColumn1").treeview();
                     $("#metaNavColumn2").treeview();
-                    $("input[type='checkbox']").change(function() {
-                        checkMetaObject($(this));
-                    })
                     $.unblockUI();
-
-
                 });
             }
         });
 
     });
 
-    function checkMetaObject(elem) {
-        if (elem.val().indexOf('_object') == -1) {
-            if (elem.is(':checked')) {
-                $('.' + elem.val() + '_object').each(function(index) {
-                    $(this).attr('checked', 'true');
-                });
-            }
-            else {
-                $('.' + elem.val() + '_object').each(function(index) {
-                    $(this).removeAttr('checked');
-                });
-            }
-        }
-    }
 
 
 </script>
