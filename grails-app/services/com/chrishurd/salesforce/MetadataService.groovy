@@ -24,52 +24,52 @@ class MetadataService {
     def static final MAX_NUM_POLL_REQUESTS = 100
 
 
-    def describeMetadata(orgInfo) {
+    def describeAllMetadata(orgInfo) {
 
         def connection = connectionService.getMetedataConnection(orgInfo)
-        def metadataObjectTypes = ["AccountCriteriaBasedSharingRule", "AccountOwnerSharingRule", "ApexClass", "ApexComponent",
-            "ApexPage", "ApexTrigger", "CampaignCriteriaBasedSharingRule", "CampaignOwnerSharingRule", "CaseCriteriaBasedSharingRule",
-            "CaseOwnerSharingRule", "ContactCriteriaBasedSharingRule", "ContactOwnerSharingRule", "CustomApplication",
-            "CustomLabels", "CustomObject", "CustomObjectCriteriaBasedSharingRule", "CustomObjectOwnerSharingRule",
-            "CustomObjectTranslation", "CustomPageWebLink", "CustomSite", "CustomTab", "Dashboard", "DataCategoryGroup",
-            "Document", "EmailTemplate", "Flow", "Group", "HomePageComponent", "HomePageLayout", "Layout",
-            "LeadCriteriaBasedSharingRule", "LeadOwnerSharingRule", "Letterhead", "OpportunityCriteriaBasedSharingRule",
-            "OpportunityOwnerSharingRule", "PermissionSet", "Portal", "Profile", "Queue", "RemoteSiteSetting",
-            "Report", "ReportType", "Role", "Scontrol", "StaticResource", "Translations", "Workflow"]
-        def queries = new ListMetadataQuery[3]
-        def metadataMap = new HashMap<String, MetadataType>()
-        def count = 0;
+        def metadataMap = this.describeMetadata(connection, MetadataEnum.values())
 
-        metadataObjectTypes.eachWithIndex { objType, index ->
-            def query = new ListMetadataQuery();
-            query.setType(objType)
-            queries[count] = query
+        return metadataMap
+    }
 
-            if (count == 2 || index == metadataObjectTypes.size() - 1) {
-                connection.listMetadata(queries, Double.valueOf(grailsApplication.config.sfdc.api.version)).each { obj ->
-                    if (! obj.manageableState.equals(ManageableState.installed) && ! obj.manageableState.equals(ManageableState.released) || obj.type.equals('CustomObject')) {
-                        if (! metadataMap.containsKey(obj.type)) {
-                            def type = new MetadataType();
-                            type.type = obj.type
-                            metadataMap.put(obj.type, type)
+    def describeMetadata(connection, objectTypes) {
+
+        def queryList = []
+        def metadataMap = [:]
+
+        objectTypes.eachWithIndex { type, index ->
+            def query = new ListMetadataQuery()
+            query.setType(type.objectType)
+            queryList.add(query)
+
+            if (queryList.size() == 3 || index + 1 == objectTypes.size()) {
+                def lmr =  connection.listMetadata(queryList as ListMetadataQuery[], Double.valueOf(grailsApplication.config.sfdc.api.version))
+                if (lmr.length > 0) {
+                    lmr.each { obj ->
+                        if (! obj.manageableState.equals(ManageableState.installed) && ! obj.manageableState.equals(ManageableState.released) || obj.type.equals('CustomObject')) {
+
+                            if (! metadataMap.containsKey(obj.type)) {
+                                def mType = new MetadataType()
+                                mType.setType(obj.type)
+                                metadataMap.put(obj.type, mType)
+                            }
+
+                            def mObj = new MetadataObject()
+                            mObj.createdBy = obj.createdByName
+                            mObj.createdOn = obj.createdDate
+                            mObj.id = obj.id
+                            mObj.lastModifiedBy = obj.lastModifiedByName
+                            mObj.lastModifiedOn = obj.lastModifiedDate
+                            mObj.name = obj.fullName
+                            mObj.filename = obj.fileName
+                            mObj.namespace = obj.namespacePrefix
+                            metadataMap.get(obj.type).objects.add(mObj)
                         }
-
-                        def mObj = new MetadataObject()
-                        mObj.createdBy = obj.createdByName
-                        mObj.createdOn = obj.createdDate
-                        mObj.id = obj.id
-                        mObj.lastModifiedBy = obj.lastModifiedByName
-                        mObj.lastModifiedOn = obj.lastModifiedDate
-                        mObj.name = obj.fullName
-                        mObj.filename = obj.fileName
-                        mObj.namespace = obj.namespacePrefix
-                        metadataMap.get(obj.type).objects.add(mObj)
                     }
                 }
-                count = -1
-                queries = new ListMetadataQuery[3]
+
+                queryList.clear()
             }
-            ++count
         }
 
         return metadataMap
