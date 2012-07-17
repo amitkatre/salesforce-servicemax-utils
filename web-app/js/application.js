@@ -79,6 +79,11 @@ function setNewOrgInfoDialogClick(div) {
                 if ($('#registered_orgs_list').size() > 0) {
                     $('#registered_orgs_list').trigger('reloadGrid');
                 }
+                if ($('.orgSelect').size() > 0) {
+                    $('.orgSelect').each(function(index) {
+                        $(this).append('<option value="' + data.domainObject.id + '" >' + data.domainObject.name + '</option');
+                    });
+                }
                 $.gritter.add({title: 'Update has been completed', text: "Org details saved"});
             }
             else {

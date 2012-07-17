@@ -11,14 +11,22 @@
 <head>
     <title>Main</title>
     <meta name="layout" content="main" />
+    <script type="text/javascript">
+        $(function() {
+            loadPage("#sfmMigrationDiv", "#mainBarContent", "<g:createLink controller="configuration" />", null);
+        });
+    </script>
 </head>
 
 <body>
 
-    <div class="grid_4" id="leftBarContent" >&nbsp;
+    <div class="grid_2" id="leftBarContent" >&nbsp;
     </div>
 
     <div class="grid_12" id="mainBarContent" >
+    </div>
+
+    <div class="grid_2" id="rightBarContent" >&nbsp;
     </div>
 
 

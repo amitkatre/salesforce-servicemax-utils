@@ -136,6 +136,15 @@ class OrganizationInfoController {
                     orgInfo.sandbox = false
                 }
 
+                try {
+                    connectionService.getPartnerConnection(orgInfo)
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace()
+                    render new JSON(jsonService.prepareErrorPostResponse('Unable to login with given credentials'))
+                    return
+                }
+
                 orgInfo.save(flush: true)
 
                 render new JSON(jsonService.preparePostResponse(orgInfo))

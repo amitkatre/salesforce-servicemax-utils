@@ -6,6 +6,9 @@ import com.sforce.ws.ConnectorConfig
 import java.util.regex.Pattern
 import com.sforce.soap.metadata.MetadataConnection
 import com.sforce.async.BulkConnection
+import com.sforce.async.StatusCode
+import com.sforce.soap.partner.FieldType
+import com.sforce.soap.partner.sobject.SObject
 
 class ConnectionService {
 
@@ -94,6 +97,187 @@ class ConnectionService {
         }
 
         return resultObjects
+    }
+
+    def delete(orgInfo, ids) {
+        def connection = getPartnerConnection(orgInfo)
+
+        connection.delete(ids)
+    }
+
+    def updateObjects(orgInfo, objects) {
+        def insertObjs = []
+        def updateObjs = []
+
+        objects.each { obj ->
+            if (obj.getId() != null) {
+                updateObjs.add(obj)
+            }
+            else {
+                insertObjs.add(obj)
+            }
+        }
+
+        def error
+        if (! insertObjs.isEmpty()) {
+            error = insert(orgInfo, insertObjs as SObject[])
+            if (error) {
+                return error
+            }
+        }
+
+        if (! updateObjs.isEmpty()) {
+            error = update(orgInfo, updateObjs as SObject[])
+            if (error) {
+                return error
+            }
+        }
+    }
+
+    def insert(orgInfo, objects) {
+        def connection = getPartnerConnection(orgInfo)
+
+        def results = connection.create(objects)
+        def error = checkForErrors(results)
+
+        if (! error) {
+            results.eachWithIndex { result, i ->
+                objects[i].setId(result.getId())
+            }
+        }
+
+        if (error) {
+            throw new Exception(error)
+        }
+    }
+
+    def update(orgInfo, objects) {
+        def connection = getPartnerConnection(orgInfo)
+
+        def results =  connection.update(objects)
+        def error = checkForErrors(results)
+        if (error) {
+            throw new Exception(error)
+        }
+    }
+
+
+    def checkForErrors(results) {
+        def failures = []
+        def optimisticFailure = false
+
+        results.each { result ->
+            if (! result.getSuccess()) {
+                optimisticFailure = handleError(failures, result.getErrors()[0])
+            }
+        }
+        return handleFailures(failures, optimisticFailure)
+    }
+
+    static def handleError(failures, error) {
+        failures.add(error)
+        return error.getStatusCode() == StatusCode.ENTITY_FAILED_IFLASTMODIFIED_ON_UPDATE
+    }
+
+    static def handleFailures(failures, optimisticFailure) {
+        if (! failures.isEmpty()) {
+            Iterator<Error> iter = failures.iterator()
+            while (iter.hasNext()) {
+                def error = iter.next()
+
+                if (error.getStatusCode() == StatusCode.ALL_OR_NONE_OPERATION_ROLLED_BACK && failures.size() > 1) {
+                    iter.remove()
+                }
+            }
+            def error = failures.get(0).getMessage()
+            return error
+        }
+
+        return null
+    }
+
+
+    def retrieveObject(OrganizationInfo orgInfo, String tableName, String where) {
+
+        def fields = this.getAllEditableFields(orgInfo, tableName) as Set<String>
+        fields.add('Name')
+        return this.query(orgInfo, "SELECT Id, ${fields.join(',')} FROM ${tableName} WHERE $where ")
+    }
+
+
+    def migrateObject(orgInfo, fromObj, toObj, tableName) {
+        def fields = this.getAllFields(orgInfo, tableName) as Set<String>
+        fields.each { field ->
+            if (field.isUpdateable() && ! (["ID", "NAME", "OWNERID", "RECORDTYPEID"] as Set<String>).contains(field.getName().toUpperCase())) {
+                if (field.getType().equals(FieldType._boolean)) {
+                    if ("true".equals(fromObj.getField(field.getName()))) {
+                        toObj.setField(field.getName(), new Boolean(true))
+                    }
+                    else {
+                        toObj.setField(field.getName(), new Boolean(false))
+                    }
+                }
+                else {
+                    toObj.setField(field.getName(), fromObj.getField(field.getName()))
+                }
+            }
+        }
+
+    }
+
+    def getAllObjects(orgInfo) {
+
+        def objects = [] as Set<String>
+
+        def connection =  this.getPartnerConnection(orgInfo)
+        def descrProcesses = connection.describeGlobal()
+
+        for (def sObject : descrProcesses.getSobjects()) {
+            objects.add(sObject.getName())
+        }
+
+        return objects
+
+    }
+
+    def getAllEditableFields(orgInfo, objectName) {
+
+        def connection = this.getPartnerConnection(orgInfo)
+
+        def descrProcesses = connection.describeSObject(objectName);
+
+        def fields = [] as Set<String>
+
+        descrProcesses.getFields().each { field ->
+            if (field.isUpdateable()) {
+                fields.add(field.getName())
+            }
+        }
+
+        return fields
+    }
+
+    def getAllFields(orgInfo, objectName) {
+        def connection = this.getPartnerConnection(orgInfo)
+
+        def descrProcesses = connection.describeSObject(objectName);
+
+        return descrProcesses.getFields()
+    }
+
+    def getAllFieldsUpperCase(orgInfo, objectName) {
+
+        def connection = this.getPartnerConnection(orgInfo)
+
+        def descrProcesses = connection.describeSObject(objectName);
+
+        def fields = [] as Set<String>
+
+        descrProcesses.getFields().each { field ->
+            fields.add(field.getName().toUpperCase())
+        }
+
+        return fields
     }
 
 
