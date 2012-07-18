@@ -64,7 +64,7 @@ class OpenIdController {
             return [command: command]
         }
 
-        if (!request.post) {
+        if (!request.post && !createNewAccount(openId)) {
             // show the form
             command.clearErrors()
             copyFromAttributeExchange command
@@ -75,11 +75,7 @@ class OpenIdController {
             return [command: command, openId: openId]
         }
 
-        if (!createNewAccount(command.username, openId)) {
-            return [command: command, openId: openId]
-        }
-
-        authenticateAndRedirect command.username
+        authenticateAndRedirect openId
     }
 
     /**
@@ -105,14 +101,14 @@ class OpenIdController {
         }
 
         try {
-            registerAccountOpenId command.username, openId
+            registerAccountOpenId openId
         }
         catch (AuthenticationException e) {
             flash.error = 'Sorry, no user was found with that username and password'
             return [command: command, openId: openId]
         }
 
-        authenticateAndRedirect command.username
+        authenticateAndRedirect openId
     }
 
     /**
@@ -146,12 +142,12 @@ class OpenIdController {
      * @param openId the associated OpenID
      * @return true if successful
      */
-    private boolean createNewAccount(String username, String openId) {
+    private boolean createNewAccount(String openId) {
         boolean created = User.withTransaction { status ->
             def config = SpringSecurityUtils.securityConfig
 
             def password = springSecurityService.encodePassword('password')
-            def user = new User(username: username, password: password, enabled: true)
+            def user = new User(username: openId, password: password, enabled: true)
 
             user.addToOpenIds(url: openId)
 
@@ -174,11 +170,11 @@ class OpenIdController {
      * @param password the password
      * @param openId the associated OpenID
      */
-    private void registerAccountOpenId(String username, String openId) {
+    private void registerAccountOpenId(String openId) {
         // check that the user exists, password is valid, etc. - doesn't actually log in or log out,
         // just checks that user exists, password is valid, account not locked, etc.
         daoAuthenticationProvider.authenticate(
-                new UsernamePasswordAuthenticationToken(username, 'password'))
+                new UsernamePasswordAuthenticationToken(openId, 'password'))
 
         User.withTransaction { status ->
             def user = User.findByUsername(username)
@@ -210,7 +206,7 @@ class OpenIdRegisterCommand {
     String username = ""
 
     static constraints = {
-        username blank: false, email: true, validator: { String username, command ->
+        username blank: true, email: true, validator: { String username, command ->
             User.withNewSession { session ->
                 if (username && User.countByUsername(username)) {
                     return 'openIdRegisterCommand.username.error.unique'

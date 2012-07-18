@@ -34,16 +34,6 @@
                             </div>
                         </div>
                     </div>
-                    <g:if test='${persistentRememberMe}'>
-                        <div class="sixteen_column section" >
-                            <div class="sixteen column" >
-                                <div class="column_content" >
-                                    <label for="remember_me" >Remember me</label>
-                                    <g:checkBox name="${rememberMeParameter}" id="remember_me" />
-                                </div>
-                            </div>
-                        </div>
-                    </g:if>
                     <div class="sixteen_column section" >
                         <div class="twelve column" >
                         </div>
