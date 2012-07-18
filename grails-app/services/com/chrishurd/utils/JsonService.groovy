@@ -62,4 +62,12 @@ class JsonService {
         postResponse.message = "There was an error"
         return postResponse
     }
+
+    def prepareErrorPostResponse(Set<String> errors) {
+        def postResponse = new AjaxPostResponse()
+        postResponse.errors.error = "Errors<br/>${errors.join("<br/>")}"
+        postResponse.success = false
+        postResponse.message = "There was an error"
+        return postResponse
+    }
 }

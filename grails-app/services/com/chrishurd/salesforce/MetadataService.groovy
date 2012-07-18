@@ -15,6 +15,7 @@ import org.apache.commons.io.FileUtils
 
 class MetadataService {
 
+    static scope = "session"
     private static final log = LogFactory.getLog(this)
 
     def connectionService
@@ -207,7 +208,7 @@ class MetadataService {
     }
 
     def getMetadataDir(orgInfo) {
-        def path = "${grailsApplication.config.sfdc_svmx.metadata.dir}${File.separator}${orgInfo.user.id}${File.separator}$orgInfo.id${File.separator}"
+        def path = "${grailsApplication.config.sfdc_svmx.metadata.dir}${File.separator}${orgInfo.user.id}${File.separator}$orgInfo.id${File.separator}meta${File.separator}"
 
         return path
     }

@@ -96,8 +96,9 @@
                     <li class="selected" >
                         <g:link action="index" controller="main" >Main</g:link>
                         <ul>
-                            <li><a href="#" onclick='loadPage("#regOrgsDiv", "#leftBarContent", "<g:createLink controller="organizationInfo" />", null);return false;' >Manage Salesforce Logins</a></li>
+                            <li><a href="#" onclick='loadPage("#regOrgsDiv", "#mainBarContent", "<g:createLink controller="organizationInfo" />", null);return false;' >Manage Salesforce Logins</a></li>
                             <li><a href="#" onclick='loadPage("#metaDataDiv", "#mainBarContent", "<g:createLink controller="metadata" />", null);return false;' >Manage Org Metadata</a></li>
+                            <li><a href="#" onclick='loadPage("#sfmMigrationDiv", "#mainBarContent", "<g:createLink controller="configuration" />", null);return false;' >Manage SFM Migrations</a></li>
                         </ul>
                     </li>
                 </ul>
