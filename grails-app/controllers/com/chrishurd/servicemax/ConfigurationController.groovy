@@ -1,6 +1,5 @@
 package com.chrishurd.servicemax
 
-import com.chrishurd.salesforce.OrganizationInfo
 import grails.converters.JSON
 import org.apache.commons.logging.LogFactory
 
@@ -12,6 +11,7 @@ class ConfigurationController {
     def jsonService
     def transactionService
     def organizationInfoService
+    def moduleService
 
 
     def index() {
@@ -22,25 +22,29 @@ class ConfigurationController {
     }
 
     def load() {
-        def orgInfo = OrganizationInfo.get(Long.valueOf(params.fromOrg))
+        def orgInfo = organizationInfoService.getUserOrg(domainService.getUserDomain(), Long.valueOf(params.fromOrg))
         def orgList = organizationInfoService.getUserOrgs(domainService.getUserDomain())
         def types = params.getList('migrateWhat')
-        def orgConfig = new SFMConfiguration()
+        def migrationObjects
 
         types.each { type ->
             if (type.equals("sfmTransaction")) {
-                orgConfig.sfmTransactions = transactionService.getSFMTransactions(orgInfo)
+                migrationObjects = transactionService.getSFMTransactions(orgInfo)
+            }
+            else if (type.equals("module")) {
+                migrationObjects =  moduleService.getCustomModules(orgInfo)
             }
         }
 
-        [orgInfo : orgInfo, orgConfig : orgConfig, orgList: orgList]
+
+        [orgInfo : orgInfo, migrationObjects : migrationObjects, orgList: orgList]
     }
 
     def save() {
         def id = params.objectId
         def type = params.type
-        def fromOrg = OrganizationInfo.get(Long.valueOf(params.fromOrg))
-        def toOrg = OrganizationInfo.get(Long.valueOf(params.toOrg))
+        def fromOrg = organizationInfoService.getUserOrg(domainService.getUserDomain(),Long.valueOf(params.fromOrg))
+        def toOrg = organizationInfoService.getUserOrg(domainService.getUserDomain(),Long.valueOf(params.toOrg))
 
 
         withFormat {
@@ -48,12 +52,18 @@ class ConfigurationController {
                 def errors
                 try {
 
+                    def results
                     if ("sfmTransaction".equals(type)) {
-                        def results = transactionService.migrateSFMTransaction(fromOrg, toOrg, id)
-                        if (results instanceof Set<Object>) {
-                            errors = results
-                        }
+                        results = transactionService.migrateSFMTransaction(fromOrg, toOrg, id)
                     }
+                    else if ("module".equals(type)) {
+                        results = moduleService.migrateModule(fromOrg, toOrg, id)
+                    }
+
+                    if (results instanceof Set<Object>) {
+                        errors = results
+                    }
+
                 }
                 catch (Exception ex) {
                     log.error("save", ex)

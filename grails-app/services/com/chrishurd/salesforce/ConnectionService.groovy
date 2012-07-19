@@ -201,13 +201,15 @@ class ConnectionService {
 
         def fields = this.getAllEditableFields(orgInfo, tableName) as Set<String>
         fields.add('Name')
-        return this.query(orgInfo, "SELECT Id, ${fields.join(',')} FROM ${tableName} WHERE $where ")
+        def results =  this.query(orgInfo, "SELECT Id, ${fields.join(',')} FROM ${tableName} WHERE $where ")
+        return results
     }
 
 
     def migrateObject(orgInfo, fromObj, toObj, tableName) {
         def fields = this.getAllFields(orgInfo, tableName) as Set<String>
         fields.each { field ->
+            println(field.getName() + "     " + field.isUpdateable())
             if (field.isUpdateable() && ! (["ID", "NAME", "OWNERID", "RECORDTYPEID"] as Set<String>).contains(field.getName().toUpperCase())) {
                 if (field.getType().equals(FieldType._boolean)) {
                     if ("true".equals(fromObj.getField(field.getName()))) {

@@ -14,9 +14,12 @@ class TransactionService {
     def getSFMTransactions(orgInfo) {
         def sfmTransactions = []
         connectionService.query(orgInfo, "SELECT Id, SVMXC__Name__c, CreatedBy.Name, LastModifiedBy.Name, LastModifiedDate, SVMXC__ProcessID__c FROM SVMXC__ServiceMax_Processes__c WHERE SVMXC__Record_Type_Name__c = 'Target Manager' AND SVMXC__IsStandard__c = false ORDER BY SVMXC__Name__c ").each { record ->
-            def sfmTransaction = new SFMTransaction()
-            sfmTransaction.sfmTransaction = record
-            sfmTransactions.add(sfmTransaction)
+            def migrObj = new MigrationObject()
+            migrObj.type = 'sfmTransaction'
+            migrObj.id = record.getId()
+            migrObj.name = "${record.getField('SVMXC__Name__c')} (${record.getField('SVMXC__ProcessID__c')}"
+            migrObj.modifiedDate = new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SS", record.getField('LastModifiedDate'))
+            sfmTransactions.add(migrObj)
         }
 
         return sfmTransactions

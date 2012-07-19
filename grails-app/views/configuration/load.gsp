@@ -19,27 +19,23 @@
     </div>
     <div class="sixteen_column section" >
         <div class="sixteen column" >
-            <g:if test="${orgConfig.sfmTransactions.size() > 0}" >
-                <h3>SFM Transactions</h3>
+            <g:if test="${migrationObjects.size() > 0}" >
                 <div class="sixteen_column section" >
                     <div class="one column" style="height:auto" ><input type="checkbox" id="allObjects" name="allObjects" onclick="toggleMigrationObjects()" /> </div>
                     <div class="six column" style="height:auto;" >Name</div>
                     <div class="three column" >Last Modified</div>
                     <div class="six column"  >Error/Comment</div>
                 </div>
-                <g:each in="${orgConfig.sfmTransactions}" var="obj" >
+                <g:each in="${migrationObjects}" var="obj" >
                     <div class="sixteen_column section" >
                         <div class="one column" style="height:auto" >
-                            <input type="checkbox" name="sfmObjects" value="sfmTransaction|${obj.sfmTransaction.getId()}" class="sfmObjects"  />
+                            <input type="checkbox" name="sfmObjects" value="${obj.type}|${obj.id}" class="sfmObjects"  />
                         </div>
-                        <div class="six column" style="height:auto;" >
-                            ${obj.sfmTransaction.getField('SVMXC__Name__c')}
-                            (${obj.sfmTransaction.getField('SVMXC__ProcessID__c')})
-                        </div>
+                        <div class="six column" style="height:auto;" >${obj.name}</div>
                         <div class="three column" >
-                            <g:formatDate date="${new Date().parse("yyyy-MM-dd'T'HH:mm:ss.SS", obj.sfmTransaction.getField('LastModifiedDate'))}"  dateStyle="MMM dd, yyyy HH:mm" />
+                            <g:formatDate date="${obj.modifiedDate}"  dateStyle="MMM dd, yyyy HH:mm" />
                         </div>
-                        <div class="six column" id="${obj.sfmTransaction.getId()}Error" style="height:auto;" >&nbsp;</div>
+                        <div class="six column" id="${obj.id}Error" style="height:auto;" >&nbsp;</div>
                     </div>
                 </g:each>
             </g:if>

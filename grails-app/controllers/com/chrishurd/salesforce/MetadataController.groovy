@@ -7,21 +7,18 @@ class MetadataController {
     def domainService
     def metadataService
     def jsonService
+    def organizationInfoService
 
 
     def index() {
 
-        def orgList = OrganizationInfo.createCriteria().list {
-            eq('user', domainService.getUserDomain())
-            order('name', 'asc')
-        }
-
+        def orgList = organizationInfoService.getUserOrgs(domainService.getUserDomain())
 
         [orgList : orgList]
     }
 
     def load() {
-        def orgInfo = OrganizationInfo.get(Long.valueOf(params.id))
+        def orgInfo = organizationInfoService.getUserOrgs(domainService.getUserDomain(), Long.valueOf(params.id))
         def metadataMap =  metadataService.describeAllMetadata(orgInfo)
         def loadedObjects = [] as Set<String>
         if (orgInfo.loadedObjects) {

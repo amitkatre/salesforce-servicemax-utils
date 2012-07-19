@@ -19,6 +19,7 @@
                     <div class="column_content" >
                         What <select id="migrateWhat" name="migrateWhat" style="width:80%" class="orgSelect" >
                         <option value="sfmTransaction" >SFM Transactions</option>
+                        <option value="module" >Modules/Submodules/Settings/Tagss/Translations</option>
                     </select>
                     </div>
                 </div>
