@@ -12,6 +12,7 @@ class ConfigurationController {
     def transactionService
     def organizationInfoService
     def moduleService
+    def profileService
 
 
     def index() {
@@ -33,6 +34,9 @@ class ConfigurationController {
             }
             else if (type.equals("module")) {
                 migrationObjects =  moduleService.getCustomModules(orgInfo)
+            }
+            else if (type.equals("profile")) {
+                migrationObjects = profileService.getCustomProfiles(orgInfo)
             }
         }
 
@@ -58,6 +62,9 @@ class ConfigurationController {
                     }
                     else if ("module".equals(type)) {
                         results = moduleService.migrateModule(fromOrg, toOrg, id)
+                    }
+                    else if ("profile".equals(type)) {
+                        results = profileService.migrationProfile(fromOrg, toOrg, id)
                     }
 
                     if (results instanceof Set<Object>) {
