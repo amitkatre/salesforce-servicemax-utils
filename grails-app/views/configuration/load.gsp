@@ -50,7 +50,7 @@
     $(function() {
 
         $('#sfmMigrateButton').click(function() {
-            if ($('#toOrg').val() != '' && $('.sfmObjects:checked').size() > 0) {
+            if ($('#migrateToOrg option:selected').val() != null && $('#migrateToOrg option:selected').val() != '' && $('.sfmObjects:checked').size() > 0) {
                 $.blockUI();
                 sfmObjects = new Array();
                 $('.sfmObjects:checked').each(function(index) {

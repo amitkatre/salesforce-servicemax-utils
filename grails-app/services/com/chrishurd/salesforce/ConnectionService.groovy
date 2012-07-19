@@ -17,6 +17,9 @@ class ConnectionService {
     def partnerConnections = [:]
     def metaConnections = [:]
     def bulkConnections = [:]
+    def allFields = [:]
+    def allFieldsUpperCase = [:]
+    def allEditableFields = [:]
 
     def getPartnerConnection(orgInfo) {
         return getPartnerConfig(orgInfo).connection
@@ -102,7 +105,26 @@ class ConnectionService {
     def delete(orgInfo, ids) {
         def connection = getPartnerConnection(orgInfo)
 
-        connection.delete(ids)
+        if (ids.size() > 100) {
+            def batchIds = []
+            ids.each { id ->
+                if (batchIds.size() == 100) {
+                    connection.delete(batchIds as String[])
+                    batchIds = []
+                }
+
+                batchIds.add(id)
+            }
+
+            if (! batchIds.isEmpty()) {
+                connection.delete(batchIds as String[])
+            }
+        }
+        else {
+            connection.delete(ids)
+        }
+
+
     }
 
     def updateObjects(orgInfo, objects) {
@@ -118,19 +140,37 @@ class ConnectionService {
             }
         }
 
-        def error
         if (! insertObjs.isEmpty()) {
-            error = insert(orgInfo, insertObjs as SObject[])
-            if (error) {
-                return error
+            def batchInsert = []
+            insertObjs.each { obj ->
+                if (batchInsert.size() == 100) {
+                    insert(orgInfo, batchInsert as SObject[])
+                    batchInsert.clear()
+                }
+
+                batchInsert.add(obj)
+            }
+
+            if (! batchInsert.isEmpty()) {
+                insert(orgInfo, batchInsert as SObject[])
             }
         }
 
         if (! updateObjs.isEmpty()) {
-            error = update(orgInfo, updateObjs as SObject[])
-            if (error) {
-                return error
+            def batchUpdate = []
+            updateObjs.each { obj ->
+                if (batchUpdate.size() == 100) {
+                    update(orgInfo, batchUpdate as SObject[])
+                    batchUpdate.clear()
+                }
+
+                batchUpdate.add(obj)
             }
+
+            if (! batchUpdate.isEmpty()) {
+                update(orgInfo, batchUpdate as SObject[])
+            }
+
         }
     }
 
@@ -209,7 +249,6 @@ class ConnectionService {
     def migrateObject(orgInfo, fromObj, toObj, tableName) {
         def fields = this.getAllFields(orgInfo, tableName) as Set<String>
         fields.each { field ->
-            println(field.getName() + "     " + field.isUpdateable())
             if (field.isUpdateable() && ! (["ID", "NAME", "OWNERID", "RECORDTYPEID"] as Set<String>).contains(field.getName().toUpperCase())) {
                 if (field.getType().equals(FieldType._boolean)) {
                     if ("true".equals(fromObj.getField(field.getName()))) {
@@ -244,42 +283,96 @@ class ConnectionService {
 
     def getAllEditableFields(orgInfo, objectName) {
 
-        def connection = this.getPartnerConnection(orgInfo)
-
-        def descrProcesses = connection.describeSObject(objectName);
-
-        def fields = [] as Set<String>
-
-        descrProcesses.getFields().each { field ->
-            if (field.isUpdateable()) {
-                fields.add(field.getName())
-            }
+        if (! allEditableFields) {
+            allEditableFields = [:]
         }
 
-        return fields
+        if (! allEditableFields.containsKey(orgInfo.id) || ! allEditableFields.get(orgInfo.id).containsKey(objectName)) {
+            if (! allEditableFields.containsKey(orgInfo.id)) {
+                allEditableFields.put(orgInfo.id, [:])
+            }
+
+            if (! allEditableFields.get(orgInfo.id).containsKey(objectName)) {
+                allEditableFields.get(orgInfo.id).putAt(objectName, [])
+            }
+
+            def connection = this.getPartnerConnection(orgInfo)
+
+            def descrProcesses = connection.describeSObject(objectName);
+
+            def fields = [] as Set<String>
+
+            descrProcesses.getFields().each { field ->
+                if (field.isUpdateable()) {
+                    fields.add(field.getName())
+                }
+            }
+
+            allEditableFields.get(orgInfo.id).get(objectName).addAll(fields)
+
+        }
+
+        return allEditableFields.get(orgInfo.id).get(objectName)
+
     }
 
     def getAllFields(orgInfo, objectName) {
-        def connection = this.getPartnerConnection(orgInfo)
+        if (! allFields) {
+            allFields = [:]
+        }
+        if (! allFields.containsKey(orgInfo.id) || ! allFields.get(orgInfo.id).containsKey(objectName)) {
+            if (! allFields.containsKey(orgInfo.id)) {
+                allFields.put(orgInfo.id, [:])
+            }
 
-        def descrProcesses = connection.describeSObject(objectName);
+            if (! allFields.get(orgInfo.id).containsKey(objectName)) {
+                allFields.get(orgInfo.id).putAt(objectName, [])
+            }
 
-        return descrProcesses.getFields()
+            def connection = this.getPartnerConnection(orgInfo)
+
+            def descrProcesses = connection.describeSObject(objectName);
+
+            allFields.get(orgInfo.id).get(objectName).addAll(descrProcesses.getFields())
+
+        }
+
+        return allFields.get(orgInfo.id).get(objectName)
+
     }
 
     def getAllFieldsUpperCase(orgInfo, objectName) {
 
-        def connection = this.getPartnerConnection(orgInfo)
-
-        def descrProcesses = connection.describeSObject(objectName);
-
-        def fields = [] as Set<String>
-
-        descrProcesses.getFields().each { field ->
-            fields.add(field.getName().toUpperCase())
+        if (! allFieldsUpperCase) {
+            allFieldsUpperCase = [:]
         }
 
-        return fields
+        if (! allFieldsUpperCase.containsKey(orgInfo.id) || ! allFieldsUpperCase.get(orgInfo.id).containsKey(objectName)) {
+            if (! allFieldsUpperCase.containsKey(orgInfo.id)) {
+                allFieldsUpperCase.put(orgInfo.id, [:])
+            }
+
+            if (! allFieldsUpperCase.get(orgInfo.id).containsKey(objectName)) {
+                allFieldsUpperCase.get(orgInfo.id).putAt(objectName, [])
+            }
+
+            def connection = this.getPartnerConnection(orgInfo)
+
+            def descrProcesses = connection.describeSObject(objectName);
+
+            def fields = [] as Set<String>
+
+            descrProcesses.getFields().each { field ->
+                fields.add(field.getName().toUpperCase())
+            }
+
+            allFields.get(orgInfo.id).get(objectName).addAll(fields)
+
+        }
+
+        return allFieldsUpperCase.get(orgInfo.id).get(objectName)
+
+
     }
 
 
