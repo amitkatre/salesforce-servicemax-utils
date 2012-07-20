@@ -13,6 +13,7 @@ class Module {
     def submodulesByModuleId = [:]
     def profiles = [:]
     def profilesByName = [:]
+    def globalProfile
 
     def getProfile(name) {
         if (profilesByName.isEmpty() && ! profiles.isEmpty()) {
