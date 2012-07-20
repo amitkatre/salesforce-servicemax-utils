@@ -130,7 +130,11 @@ class ModuleService {
                         newConfigData.setField('RecordTypeId', recordTypeService.getRecordTypeId(toOrgInfo, 'SVMXC__ServiceMax_Config_Data__c', 'Setting Value'))
                         connectionService.migrateObject(toOrgInfo, configData, newConfigData, 'SVMXC__ServiceMax_Config_Data__c')
                         newConfigData.setField('SVMXC__Setting_ID__c', toSubmodule.settings.get(configData.getField('SVMXC__Setting_ID__c')).getId())
-                        if (fromModule.profiles.containsKey(configData.getField('SVMXC__Setting_Configuration_Profile__c'))) {
+                        if (fromModule.globalProfile.getId().equals(configData.getField('SVMXC__Setting_Configuration_Profile__c'))) {
+                            newConfigData.setField('SVMXC__Setting_Configuration_Profile__c', toModule.globalProfile.getId())
+                            toSubmodule.configData.put(configData.getId(), newConfigData)
+                        }
+                        else if (fromModule.profiles.containsKey(configData.getField('SVMXC__Setting_Configuration_Profile__c'))) {
                             def prof = fromModule.profiles.get(configData.getField('SVMXC__Setting_Configuration_Profile__c'))
                             def newProf = toModule.getProfile(prof.getField('SVMXC__Profile_Name__c'))
                             if (newProf != null) {
@@ -138,10 +142,10 @@ class ModuleService {
                                 toSubmodule.configData.put(configData.getId(), newConfigData)
                             }
                         }
+                    }
 
-                        if (! toSubmodule.configData.isEmpty()) {
-                            connectionService.updateObjects(toOrgInfo, toSubmodule.configData.values())
-                        }
+                    if (! toSubmodule.configData.isEmpty()) {
+                        connectionService.updateObjects(toOrgInfo, toSubmodule.configData.values())
                     }
                 }
 
@@ -223,8 +227,13 @@ class ModuleService {
 
     def populateModuleDetails(orgInfo, module) {
 
-        connectionService.retrieveObject(orgInfo, 'SVMXC__ServiceMax_Config_Data__c', " SVMXC__RecordType_Name__c = 'Configuration Profile' AND SVMXC__IsDefault__c = true ").each {record ->
-            module.profiles.put(record.getId(), record)
+        connectionService.retrieveObject(orgInfo, 'SVMXC__ServiceMax_Config_Data__c', " SVMXC__RecordType_Name__c = 'Configuration Profile' AND (SVMXC__IsDefault__c = true OR (SVMXC__Active__c = true AND SVMXC__Configuration_Type__c = 'Global')) ").each {record ->
+            if ("Global".equals(record.getField('SVMXC__Configuration_Type__c')) && 'true'.equals(record.getField('SVMXC__Active__c'))) {
+                module.globalProfile = record
+            }
+            else {
+                module.profiles.put(record.getId(), record)
+            }
         }
 
         connectionService.retrieveObject(orgInfo, 'SVMXC__ServiceMax_Processes__c', " SVMXC__Module__c = '${module.module.getId()}' AND SVMXC__Record_Type_Name__c = 'Submodule' ").each { record ->

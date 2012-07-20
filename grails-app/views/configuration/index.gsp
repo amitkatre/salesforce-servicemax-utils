@@ -21,6 +21,7 @@
                         <option value="sfmTransaction" >SFM Transactions</option>
                         <option value="module" >Modules/Submodules/Settings/Tagss/Translations</option>
                         <option value="profile" >Configuration Profiles</option>
+                        <option value="sfAction" >SF Actions</option>
 
                     </select>
                     </div>
