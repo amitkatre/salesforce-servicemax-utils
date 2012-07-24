@@ -10,6 +10,7 @@ class OrganizationInfo {
     String securityToken
     Boolean sandbox = false
     String loadedObjects
+    String orgId
 
     static belongsTo = [
             user: User
@@ -25,6 +26,7 @@ class OrganizationInfo {
         username nullable: false, blank: false, maxSize:  255
         password nullable: false, blank: false, maxSize: 255
         securityToken nullable: true, maxSize: 64
+        orgId nullable:  true, maxSize: 32
         sandbox nullable: false
         loadedObjects nullable: true, blank: true, maxSize: 1000000
     }

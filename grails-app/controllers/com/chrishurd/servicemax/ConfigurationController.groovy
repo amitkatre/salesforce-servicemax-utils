@@ -14,6 +14,7 @@ class ConfigurationController {
     def moduleService
     def profileService
     def actionService
+    def inventoryService
 
 
     def index() {
@@ -30,17 +31,20 @@ class ConfigurationController {
         def migrationObjects
 
         types.each { type ->
-            if (type.equals("sfmTransaction")) {
+            if ("sfmTransaction".equals(type)) {
                 migrationObjects = transactionService.getSFMTransactions(orgInfo)
             }
-            else if (type.equals("module")) {
+            else if ("module".equals(type)) {
                 migrationObjects =  moduleService.getCustomModules(orgInfo)
             }
-            else if (type.equals("profile")) {
+            else if ("profile".equals(type)) {
                 migrationObjects = profileService.getCustomProfiles(orgInfo)
             }
-            else if (type.equals("sfAction")) {
+            else if ("sfAction".equals(type)) {
                 migrationObjects = actionService.getCustomActions(orgInfo)
+            }
+            else if ("inventory".equals(type)) {
+                migrationObjects = inventoryService.getCustomProcesses(orgInfo)
             }
         }
 
@@ -72,6 +76,9 @@ class ConfigurationController {
                     }
                     else if ("sfAction".equals(type)) {
                         results = actionService.migrateAction(fromOrg, toOrg, id)
+                    }
+                    else if ("inventory".equals(type)) {
+                        results = inventoryService.migrateProcess(fromOrg, toOrg, id)
                     }
 
                     if (results instanceof Set<Object>) {

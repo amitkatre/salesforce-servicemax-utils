@@ -42,6 +42,11 @@ class ConnectionService {
         def co = new CallOptions_element();
         co.setClient(orgInfo.name)
 
+        if (orgInfo.orgId == null) {
+            orgInfo.orgId = connectionInfo.getServiceEndpoint().substring(connectionInfo.getServiceEndpoint().lastIndexOf('/') + 1)
+            orgInfo.save()
+        }
+
         connection.__setCallOptions(co)
         connectionInfo.connection = connection
 
