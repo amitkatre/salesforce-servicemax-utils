@@ -46,17 +46,17 @@ class ModuleService {
         def fromModule = this.getModule(fromOrgInfo, id)
 
         def toModule = this.getModuleByModuleId(toOrgInfo, fromModule.module.getField('SVMXC__ModuleID__c'))
+
+        return this.migrateModuleDetails(toOrgInfo, fromModule, toModule)
+    }
+
+    def migrateModuleDetails(toOrgInfo, fromModule, toModule) {
         def newModule = new SObject()
         newModule.setType('SVMXC__ServiceMax_Processes__c')
         newModule.setField('RecordTypeId', recordTypeService.getRecordTypeId(toOrgInfo, 'SVMXC__ServiceMax_Processes__c', 'Module'))
         if (toModule) {
             this.cleanModule(toOrgInfo, toModule)
-            if ("false".equals(toModule.module.getField('SVMXC__IsStandard__c'))) {
-                newModule.setId(toModule.module.getId())
-            }
-            else {
-                newModule = toModule.module
-            }
+            newModule.setId(toModule.module.getId())
         }
         else {
             toModule = new Module()
@@ -74,24 +74,25 @@ class ModuleService {
                 def submodule = fromModule.submodules.get(submoduleId)
                 def toSubmodule = toModule.getSubmodule(submodule.submodule.getField('SVMXC__SubmoduleID__c'))
                 def newSubmodule = new SObject()
+                def newSubId
                 newSubmodule.setType('SVMXC__ServiceMax_Processes__c')
                 newSubmodule.setField('RecordTypeId', recordTypeService.getRecordTypeId(toOrgInfo, 'SVMXC__ServiceMax_Processes__c', 'Submodule'))
                 if (toSubmodule) {
-                    if ("false".equals(toSubmodule.submodule.getField("SVMXC__IsStandard__c"))) {
-                        newSubmodule.setId(toSubmodule.submodule.getId())
-                    }
-                    else {
-                        newSubmodule = toSubmodule.submodule
-                    }
+                    newSubmodule.setId(toSubmodule.submodule.getId())
+                    newSubId = toSubmodule.submodule.getId()
                 }
                 else {
                     toSubmodule = new Submodule()
                 }
 
-                if ("false".equals(submodule.submodule.getField('SVMXC__IsStandard__c'))) {
+                if (newSubId == null || "false".equals(submodule.submodule.getField('SVMXC__IsStandard__c'))) {
                     connectionService.migrateObject(toOrgInfo, submodule.submodule, newSubmodule, 'SVMXC__ServiceMax_Processes__c')
                     newSubmodule.setField('SVMXC__Module__c', newModule.getId())
+                    if (newSubmodule.getField('SVMXC__SubmoduleID__c').size() < 8) {
+                        newSubmodule.setField('SVMXC__Installation_Key__c', toOrgInfo.orgId.bytes.encodeBase64().toString())
+                    }
                     connectionService.updateObjects(toOrgInfo, [newSubmodule])
+                    newSubId = newSubmodule.getId()
                 }
 
                 toSubmodule.submodule = newSubmodule
@@ -101,7 +102,7 @@ class ModuleService {
                         def newTag = new SObject()
                         newTag.setType('SVMXC__ServiceMax_Tags__c')
                         connectionService.migrateObject(toOrgInfo, tag, newTag, 'SVMXC__ServiceMax_Tags__c')
-                        newTag.setField('SVMXC__Submodule__c', newSubmodule.getId())
+                        newTag.setField('SVMXC__Submodule__c', newSubId)
                         newTag.setField('Name', tag.getField('Name'))
                         toSubmodule.tags.put(tag.getId(), newTag)
                     }
@@ -116,7 +117,11 @@ class ModuleService {
                         newSetting.setField('RecordTypeId', recordTypeService.getRecordTypeId(toOrgInfo, 'SVMXC__ServiceMax_Processes__c', 'Settings'))
                         connectionService.migrateObject(toOrgInfo, setting, newSetting, 'SVMXC__ServiceMax_Processes__c')
                         newSetting.setField('SVMXC__Module__c', newModule.getId())
-                        newSetting.setField('SVMXC__Submodule__c', newSubmodule.getId())
+                        newSetting.setField('SVMXC__Submodule__c', newSubId)
+                        if (newSetting.getField('SVMXC__SettingID__c').size() < 8) {
+                            newSetting.setField('SVMXC__Installation_Key__c', toOrgInfo.orgId.bytes.encodeBase64().toString())
+                        }
+
                         toSubmodule.settings.put(setting.getId(), newSetting)
                     }
 
@@ -203,6 +208,7 @@ class ModuleService {
 
         if (module.module) {
             this.populateModuleDetails(orgInfo, module)
+            this.populateModuleProfileDetails(orgInfo, module)
             return module
         }
 
@@ -219,6 +225,7 @@ class ModuleService {
 
         if (module.module) {
             this.populateModuleDetails(orgInfo, module)
+            this.populateModuleProfileDetails(orgInfo, module)
             return module
         }
 
@@ -227,6 +234,12 @@ class ModuleService {
 
     def populateModuleDetails(orgInfo, module) {
 
+        connectionService.retrieveObject(orgInfo, 'SVMXC__ServiceMax_Processes__c', " SVMXC__Module__c = '${module.module.getId()}' AND SVMXC__Record_Type_Name__c = 'Submodule' ").each { record ->
+            module.submodules.put(record.getId(), this.getSubmodule(orgInfo, record))
+        }
+    }
+
+    def populateModuleProfileDetails(orgInfo, module) {
         connectionService.retrieveObject(orgInfo, 'SVMXC__ServiceMax_Config_Data__c', " SVMXC__RecordType_Name__c = 'Configuration Profile' AND (SVMXC__IsDefault__c = true OR (SVMXC__Active__c = true AND SVMXC__Configuration_Type__c = 'Global')) ").each {record ->
             if ("Global".equals(record.getField('SVMXC__Configuration_Type__c')) && 'true'.equals(record.getField('SVMXC__Active__c'))) {
                 module.globalProfile = record
@@ -234,10 +247,6 @@ class ModuleService {
             else {
                 module.profiles.put(record.getId(), record)
             }
-        }
-
-        connectionService.retrieveObject(orgInfo, 'SVMXC__ServiceMax_Processes__c', " SVMXC__Module__c = '${module.module.getId()}' AND SVMXC__Record_Type_Name__c = 'Submodule' ").each { record ->
-            module.submodules.put(record.getId(), this.getSubmodule(orgInfo, record))
         }
     }
 
