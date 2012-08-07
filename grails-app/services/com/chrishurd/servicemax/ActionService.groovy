@@ -4,6 +4,7 @@ import com.sforce.soap.partner.sobject.SObject
 
 class ActionService {
 
+    static scope = "request"
     def connectionService
     def recordTypeService
 

@@ -78,7 +78,15 @@ log4j = {
     // appender:
     //
     appenders {
-        console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
+        environments {
+            development {
+                console name: "stdout",  layout:pattern(conversionPattern: '%c{2} %m%n')
+            }
+            production {
+                rollingFile name:'file', maxFileSize: 1024, file:"/usr/local/tomcat/logs/svmxc.log"
+            }
+        }
+
     }
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
