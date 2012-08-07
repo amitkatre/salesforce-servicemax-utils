@@ -371,7 +371,7 @@ class ConnectionService {
                 fields.add(field.getName().toUpperCase())
             }
 
-            allFields.get(orgInfo.id).get(objectName).addAll(fields)
+            allFieldsUpperCase.get(orgInfo.id).get(objectName).addAll(fields)
 
         }
 

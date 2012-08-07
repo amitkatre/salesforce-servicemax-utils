@@ -15,7 +15,7 @@ class ConfigurationController {
     def profileService
     def actionService
     def inventoryService
-
+    def wizardService
 
     def index() {
 
@@ -46,6 +46,10 @@ class ConfigurationController {
             else if ("inventory".equals(type)) {
                 migrationObjects = inventoryService.getCustomProcesses(orgInfo)
             }
+            else if ("wizard".equals(type)) {
+                migrationObjects = wizardService.getCustomWizards(orgInfo)
+            }
+
         }
 
 
@@ -80,6 +84,7 @@ class ConfigurationController {
                     else if ("inventory".equals(type)) {
                         results = inventoryService.migrateProcess(fromOrg, toOrg, id)
                     }
+
 
                     if (results instanceof Set<Object>) {
                         errors = results

@@ -33,7 +33,7 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
-        // runtime 'mysql:mysql-connector-java:5.1.16'
+        runtime 'mysql:mysql-connector-java:5.1.21'
 
         compile "com.force.api:force-wsc:24.0.0"
         compile "com.force.api:force-partner-api:24.0.0"

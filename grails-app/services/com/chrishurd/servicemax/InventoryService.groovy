@@ -4,6 +4,7 @@ import com.sforce.soap.partner.sobject.SObject
 
 class InventoryService {
 
+    static scope = "request"
     def connectionService
     def recordTypeService
     def moduleService
@@ -83,7 +84,7 @@ class InventoryService {
     def getInventoryByProcessId(orgInfo, processId) {
         def inv = new Inventory()
 
-        connectionService.retrieveObject(orgInfo, 'SVMXC__ServiceMax_Processes__c', " SVMXC__ProcessID__c = '${processId}' ").each { record ->
+        connectionService.retrieveObject(orgInfo, 'SVMXC__ServiceMax_Processes__c', " SVMXC__ProcessID__c = '${processId}' AND SVMXC__Record_Type_Name__c = 'Inventory Process' ").each { record ->
             inv.inventory = record
         }
 

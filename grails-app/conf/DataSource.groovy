@@ -47,18 +47,22 @@ environments {
     }
     production {
         dataSource {
-            dbCreate = "update"
-            url = "jdbc:h2:prodDb;MVCC=TRUE"
             pooled = true
+            dbCreate = "update" // one of 'create', 'create-drop','update'
+            driverClassName = "com.mysql.jdbc.Driver"
+            username = "root"
+            password = "maxpl0re2"
+            url = "jdbc:mysql://localhost/svmxc"
+            dialect = org.hibernate.dialect.MySQL5InnoDBDialect
             properties {
-               maxActive = -1
-               minEvictableIdleTimeMillis=1800000
-               timeBetweenEvictionRunsMillis=1800000
-               numTestsPerEvictionRun=3
-               testOnBorrow=true
-               testWhileIdle=true
-               testOnReturn=true
-               validationQuery="SELECT 1"
+                maxActive = 50
+                maxIdle = 25
+                minIdle = 5
+                initialSize = 5
+                minEvictableIdleTimeMillis = 60000
+                timeBetweenEvictionRunsMillis = 60000
+                maxWait = 10000
+                validationQuery = "/* ping */"
             }
         }
     }
