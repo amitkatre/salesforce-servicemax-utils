@@ -15,6 +15,8 @@ class PageLayout {
     def events = [:]
     def namedSearches = [:]
     def namedSearchIds = []
+    def codeSnippets = [:]
+    def codeSnippetIds = []
     def originalId
 
     def obj

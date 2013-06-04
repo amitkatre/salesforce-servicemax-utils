@@ -7,6 +7,7 @@ class PageLayoutService {
     static scope = "request"
     def connectionService
     def namedSearchService
+    def codeSnippetService
 
     def getPageLayoutByLayoutId(orgInfo, layoutId) {
         def pageLayout = new PageLayout()
@@ -54,7 +55,12 @@ class PageLayoutService {
 
         connectionService.retrieveObject(orgInfo, 'SVMXC__SFM_Event__c', " SVMXC__Page_Layout__c = '${pageLayout.pageLayout.getId()}' ").each { record ->
             pageLayout.events.put(record.getId(), record)
+            if (record.getField('SVMXC__Code_Snippet__c') != null) {
+                pageLayout.codeSnippetIds.add(record.getField('SVMXC__Code_Snippet__c'))
+            }
         }
+
+
 
         connectionService.retrieveObject(orgInfo, 'SVMXC__Page_Layout_Detail__c', " SVMXC__Page_Layout__c = '${pageLayout.pageLayout.getId()}' ").each { record ->
             if ('Section'.equals(record.getField('SVMXC__Detail_Type__c'))) {
@@ -73,11 +79,26 @@ class PageLayoutService {
             }
         }
 
+
+
         if (! pageLayout.pageDetails.isEmpty()) {
             connectionService.retrieveObject(orgInfo, 'SVMXC__SFM_Event__c', " SVMXC__Page_Layout_Detail__c IN ('${pageLayout.pageDetails.keySet().join("', '")}') ").each { record ->
                 pageLayout.events.put(record.getId(), record)
+                if (record.getField('SVMXC__Code_Snippet__c') != null) {
+                    pageLayout.codeSnippetIds.add(record.getField('SVMXC__Code_Snippet__c'))
+                }
             }
         }
+
+        if (! pageLayout.codeSnippetIds.isEmpty()) {
+            connectionService.retrieveObject(orgInfo, 'SVMXC__Code_Snippet__c', " Id IN ('${pageLayout.codeSnippetIds.join("', '")}') ").each { record ->
+                def codeSnippet = new CodeSnippet();
+                codeSnippet.codeSnippet = record
+                pageLayout.codeSnippets.put(record.getId(), codeSnippet);
+            }
+        }
+
+
 
         connectionService.retrieveObject(orgInfo, 'SVMXC__Page_Layout__c', " SVMXC__Header_Page_Layout__c = '${pageLayout.pageLayout.getId()}' ").each { record ->
 
@@ -121,6 +142,17 @@ class PageLayoutService {
 
         connectionService.retrieveObject(orgInfo, 'SVMXC__SFM_Event__c', " SVMXC__Page_Layout_Detail__c IN ('${childPageLayout.pageDetails.keySet().join("', '")}') ").each { record ->
             childPageLayout.events.put(record.getId(), record)
+            if (record.getField('SVMXC__Code_Snippet__c') != null) {
+                childPageLayout.codeSnippetIds.add(record.getField('SVMXC__Code_Snippet__c'))
+            }
+        }
+
+        if (! childPageLayout.codeSnippetIds.isEmpty()) {
+            connectionService.retrieveObject(orgInfo, 'SVMXC__Code_Snippet__c', " Id IN ('${pageLayout.codeSnippetIds.join("', '")}') ").each { record ->
+                def codeSnippet = new CodeSnippet();
+                codeSnippet.codeSnippet = record
+                pageLayout.codeSnippets.put(record.getId(), codeSnippet);
+            }
         }
 
         return childPageLayout
@@ -165,6 +197,12 @@ class PageLayoutService {
             toPageLayout.namedSearches.put(namedSearchId, namedSearchService.migrateNamedSearch(orgInfo, namedSearch))
         }
 
+        pageLayout.codeSnippets.keySet().each { codeSnippetId ->
+            def codeSnippet = pageLayout.codeSnippets.get(codeSnippetId)
+
+            toPageLayout.codeSnippets.put(codeSnippetId, codeSnippetService.migrateCodeSnippet(orgInfo, codeSnippet))
+        }
+
         if (pageLayout.pageLayout.getField('SVMXC__Multi_Add_Configuration__c') != null) {
             newPageLayout.setField('SVMXC__Multi_Add_Configuration__c', toPageLayout.namedSearches.get(pageLayout.pageLayout.getField('SVMXC__Multi_Add_Configuration__c')).namedSearch.getId())
         }
@@ -196,6 +234,12 @@ class PageLayoutService {
                     }
 
                     connectionService.updateObjects(orgInfo, newChildLayout.pageDetails.values())
+                }
+
+                child.codeSnippets.keySet().each { codeSnippetId ->
+                    def codeSnippet = child.codeSnippets.get(codeSnippetId)
+
+                    newChildLayout.codeSnippets.put(codeSnippetId, codeSnippetService.migrateCodeSnippet(orgInfo, codeSnippet))
                 }
 
                 if (! child.events.isEmpty()) {
@@ -265,6 +309,10 @@ class PageLayoutService {
 
         if (event.getField('SVMXC__Page_Layout_Detail__c') != null && pageLayout.pageDetails.containsKey(event.getField('SVMXC__Page_Layout_Detail__c'))) {
             newEvent.setField('SVMXC__Page_Layout_Detail__c', pageLayout.pageDetails.get(event.getField('SVMXC__Page_Layout_Detail__c')).getId())
+        }
+
+        if (event.getField('SVMXC__Code_Snippet__c') != null && pageLayout.codeSnippets.containsKey(event.getField('SVMXC__Code_Snippet__c'))) {
+            newEvent.setField('SVMXC__Code_Snippet__c', pageLayout.codeSnippets.get(event.getField('SVMXC__Code_Snippet__c')).codeSnippet.getId())
         }
 
         return newEvent

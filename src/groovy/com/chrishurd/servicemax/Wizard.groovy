@@ -9,6 +9,7 @@ package com.chrishurd.servicemax
 class Wizard {
 
     def wizard
+
     def wizardAccess = [:]
     def wizardStep = [:]
     def profiles = [:]

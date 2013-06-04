@@ -23,7 +23,7 @@
                         <option value="profile" >Configuration Profiles</option>
                         <option value="sfAction" >SF Actions</option>
                         <option value="inventory" >Inventory Process</option>
-                     <!--   <option value="wizard" >Wizards</option> -->
+                       <!-- <option value="wizard" >Wizards</option> -->
 
                     </select>
                     </div>
